@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock de la Biblioteca</title>
+</head>
+<body>
+    <h1>Stock de la Biblioteca</h1>
+
+    <form onsubmit="agregarLibro(event)">
+        <label for="nombre">Nombre:</label><br>
+        <input type="text" id="nombre" name="nombre"><br>
+        <label for="autor">Autor:</label><br>
+        <input type="text" id="autor" name="autor"><br>
+        <label for="categoria">Categoría:</label><br>
+        <input type="text" id="categoria" name="categoria"><br>
+        <label for="estado">Estado:</label><br>
+        <input type="text" id="estado" name="estado"><br>
+        <label for="cantidad">Cantidad:</label><br>
+        <input type="number" id="cantidad" name="cantidad"><br><br>
+        <input type="submit" value="Agregar Libro">
+    </form>
+
+    <table id="libros-table">
+        <tr>
+            <th>Nombre</th>
+            <th>Autor</th>
+            <th>Categoría</th>
+            <th>Estado</th>
+            <th>Cantidad</th>
+            <th>Acciones</th>
+        </tr>
+    </table>
+
+    <script src="stock.js"></script>
+    <script>
+// Función para guardar los libros en localStorage
+function guardarLibros() {
+    localStorage.setItem("libros", JSON.stringify(libros));
+}
+
+// Función para cargar los libros desde localStorage o inicializar con una lista vacía
+function cargarLibros() {
+    const librosGuardados = localStorage.getItem("libros");
+    return librosGuardados ? JSON.parse(librosGuardados) : [];
+}
+
+// Obtener libros al iniciar la página
+let libros = cargarLibros();
+
+function mostrarLibros() {
+    const tabla = document.getElementById("libros-table");
+    tabla.innerHTML = `
+        <tr>
+            <th>Nombre</th>
+            <th>Autor</th>
+            <th>Categoría</th>
+            <th>Estado</th>
+            <th>Cantidad</th>
+            <th>Acciones</th>
+        </tr>
+    `;
+
+    libros.forEach((libro, index) => {
+        const row = tabla.insertRow();
+        const cell1 = row.insertCell(0);
+        const cell2 = row.insertCell(1);
+        const cell3 = row.insertCell(2);
+        const cell4 = row.insertCell(3);
+        const cell5 = row.insertCell(4);
+        const cell6 = row.insertCell(5);
+
+        cell1.innerHTML = `<span id="nombre-${index}">${libro.nombre}</span>`;
+        cell2.innerHTML = `<span id="autor-${index}">${libro.autor}</span>`;
+        cell3.innerHTML = `<span id="categoria-${index}">${libro.categoria}</span>`;
+        cell4.innerHTML = `<span id="estado-${index}">${libro.estado}</span>`;
+        cell5.innerHTML = `<span id="cantidad-${index}">${libro.cantidad}</span>`;
+        cell6.innerHTML = `<button onclick="editarLibro(${index})">Editar</button> <button onclick="eliminarLibro(${index})">Eliminar</button>`;
+    });
+}
+
+// Función para agregar un nuevo libro desde el formulario
+function agregarLibro(event) {
+    event.preventDefault();
+    const nombre = document.getElementById("nombre").value;
+    const autor = document.getElementById("autor").value;
+    const categoria = document.getElementById("categoria").value;
+    const estado = document.getElementById("estado").value;
+    const cantidad = parseInt(document.getElementById("cantidad").value);
+
+    if (nombre && autor && categoria && estado && cantidad) {
+        let existingBook = libros.find((libro) => libro.nombre === nombre && libro.autor === autor);
+        if (existingBook) {
+            existingBook.cantidad += cantidad;
+        } else {
+            libros.push({ nombre, autor, categoria, estado, cantidad });
+        }
+        guardarLibros();
+        mostrarLibros();
+    } else {
+        alert("Por favor, complete todos los campos.");
+    }
+}
+
+function editarLibro(index) {
+    const nombre = document.getElementById(`nombre-${index}`);
+    const autor = document.getElementById(`autor-${index}`);
+    const categoria = document.getElementById(`categoria-${index}`);
+    const estado = document.getElementById(`estado-${index}`);
+    const cantidad = document.getElementById(`cantidad-${index}`);
+
+    const nuevoNombre = prompt("Ingrese el nuevo nombre del libro", nombre.innerText);
+    const nuevoAutor = prompt("Ingrese el nuevo autor del libro", autor.innerText);
+    const nuevaCategoria = prompt("Ingrese la nueva categoría del libro", categoria.innerText);
+    const nuevoEstado = prompt("Ingrese el nuevo estado del libro", estado.innerText);
+    const nuevaCantidad = prompt("Ingrese la nueva cantidad del libro", cantidad.innerText);
+
+    if (nuevoNombre && nuevoAutor && nuevaCategoria && nuevoEstado && nuevaCantidad) {
+        nombre.innerText = nuevoNombre;
+        autor.innerText = nuevoAutor;
+        categoria.innerText = nuevaCategoria;
+        estado.innerText = nuevoEstado;
+        cantidad.innerText = nuevaCantidad;
+    } else {
+        alert("Por favor, complete todos los campos.");
+    }
+}
+
+// Función para limpiar los campos del formulario
+function limpiarFormulario() {
+    document.getElementById("nombre").value = "";
+    document.getElementById("autor").value = "";
+    document.getElementById("categoria").value = "";
+    document.getElementById("estado").value = "";
+    document.getElementById("cantidad").value = "";
+}
+
+
+// Función para eliminar un libro
+function eliminarLibro(index) {
+    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar ${libros[index].nombre} de la lista?`);
+    if (confirmacion) {
+        libros.splice(index, 1);
+        guardarLibros();
+        mostrarLibros();
+    }
+}
+
+mostrarLibros();
+
+    </script>
+</body>
+</html>
+

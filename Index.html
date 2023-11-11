@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header, footer {
+    background-color: #f2f2f2;
+    padding: 20px;
+    text-align: center;
+}
+
+#libros-section {
+    padding: 20px;
+}
+
+#libros-lista {
+    list-style-type: none;
+    padding: 0;
+}
+
+#libros-lista li {
+    margin: 10px 0;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+</style>
+<body>
+    <header>
+        <h1>Bienvenido a la Biblioteca</h1>
+    </header>
+
+    <button onclick="Stock()">Ver Stock</button>
+
+    <footer>
+        <p>&copy; 2023 Biblioteca</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+// Función para redirigir a la página de stock
+function Stock() {
+    window.location.href = "stock.html";
+}
+
+// Función para guardar los libros en localStorage
+function guardarLibros(libros) {
+    localStorage.setItem("libros", JSON.stringify(libros));
+}
+
+// Función para cargar los libros desde localStorage
+function cargarLibros() {
+    const libros = localStorage.getItem("libros");
+    return libros ? JSON.parse(libros) : [];
+}
+
+// Función para mostrar el stock de libros en la página
+function mostrarStock() {
+    const lista = document.getElementById("libros-lista");
+    lista.innerHTML = "";
+
+    const libros = cargarLibros();
+
+    libros.forEach((libro, index) => {
+        const item = document.createElement("li");
+        item.innerHTML = `<strong>${libro.nombre}</strong> - ${libro.autor} (${libro.categoria}) - Estado: ${libro.estado}, Cantidad: ${libro.cantidad}
+        <button onclick="editarLibro(${index})">Editar</button>
+        <button onclick="eliminarLibro(${index})">Eliminar</button>`;
+        lista.appendChild(item);
+    });
+}
+
+// Función para agregar un nuevo libro
+function agregarLibro(nombre, autor, categoria, estado, cantidad) {
+    const libros = cargarLibros();
+    libros.push({ nombre, autor, categoria, estado, cantidad });
+    guardarLibros(libros);
+    mostrarStock();
+}
+
+// Función para editar un libro existente
+function editarLibro(index) {
+    const libros = cargarLibros();
+    const libro = libros[index];
+
+    const nuevoNombre = prompt("Ingrese el nuevo nombre del libro", libro.nombre);
+    const nuevoAutor = prompt("Ingrese el nuevo autor del libro", libro.autor);
+    const nuevaCategoria = prompt("Ingrese la nueva categoría del libro", libro.categoria);
+    const nuevoEstado = prompt("Ingrese el nuevo estado del libro", libro.estado);
+    const nuevaCantidad = prompt("Ingrese la nueva cantidad del libro", libro.cantidad);
+
+    libros[index] = {
+        nombre: nuevoNombre,
+        autor: nuevoAutor,
+        categoria: nuevaCategoria,
+        estado: nuevoEstado,
+        cantidad: nuevaCantidad
+    };
+
+    guardarLibros(libros);
+    mostrarStock();
+}
+
+// Función para eliminar un libro
+function eliminarLibro(index) {
+    const libros = cargarLibros();
+    libros.splice(index, 1);
+    guardarLibros(libros);
+    mostrarStock();
+}
+
+// Mostrar los libros al cargar la página
+mostrarStock();
+    </script>
+</body>
+</html>
