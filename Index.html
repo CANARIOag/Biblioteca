@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteca</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-wr2yMl6B+RkgI61ZgWk1hD5e1j8SkfyV/2vU1pZZ2NSDIy8kqsp8bYDPBhqDHnmDdI78lMV3qpIUCe2UkNW6RQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <style>
-    body {
-    font-family: Arial, sans-serif;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #f5f5f5;
 }
 
 header, footer {
-    background-color: #f2f2f2;
+    background-color: #333;
+    color: #fff;
     padding: 20px;
     text-align: center;
+}
+
+h1 {
+    margin: 0;
 }
 
 #libros-section {
@@ -30,6 +36,48 @@ header, footer {
 
 #libros-lista li {
     margin: 10px 0;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#libros-lista li:hover {
+    background-color: #f0f0f0;
+}
+
+button {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-content p {
+    margin: 0;
+}
+
+.icon {
+    font-size: 20px;
+    margin-right: 5px;
 }
 
 footer {
@@ -37,6 +85,9 @@ footer {
     left: 0;
     bottom: 0;
     width: 100%;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
 }
 </style>
 <body>
@@ -46,85 +97,12 @@ footer {
 
     <button onclick="Stock()">Ver Stock</button>
 
+    <button onclick="Pedidos()">Pedidos</button>
+
     <footer>
         <p>&copy; 2023 Biblioteca</p>
     </footer>
 
     <script src="script.js"></script>
-    <script>
-// Función para redirigir a la página de stock
-function Stock() {
-    window.location.href = "stock.html";
-}
-
-// Función para guardar los libros en localStorage
-function guardarLibros(libros) {
-    localStorage.setItem("libros", JSON.stringify(libros));
-}
-
-// Función para cargar los libros desde localStorage
-function cargarLibros() {
-    const libros = localStorage.getItem("libros");
-    return libros ? JSON.parse(libros) : [];
-}
-
-// Función para mostrar el stock de libros en la página
-function mostrarStock() {
-    const lista = document.getElementById("libros-lista");
-    lista.innerHTML = "";
-
-    const libros = cargarLibros();
-
-    libros.forEach((libro, index) => {
-        const item = document.createElement("li");
-        item.innerHTML = `<strong>${libro.nombre}</strong> - ${libro.autor} (${libro.categoria}) - Estado: ${libro.estado}, Cantidad: ${libro.cantidad}
-        <button onclick="editarLibro(${index})">Editar</button>
-        <button onclick="eliminarLibro(${index})">Eliminar</button>`;
-        lista.appendChild(item);
-    });
-}
-
-// Función para agregar un nuevo libro
-function agregarLibro(nombre, autor, categoria, estado, cantidad) {
-    const libros = cargarLibros();
-    libros.push({ nombre, autor, categoria, estado, cantidad });
-    guardarLibros(libros);
-    mostrarStock();
-}
-
-// Función para editar un libro existente
-function editarLibro(index) {
-    const libros = cargarLibros();
-    const libro = libros[index];
-
-    const nuevoNombre = prompt("Ingrese el nuevo nombre del libro", libro.nombre);
-    const nuevoAutor = prompt("Ingrese el nuevo autor del libro", libro.autor);
-    const nuevaCategoria = prompt("Ingrese la nueva categoría del libro", libro.categoria);
-    const nuevoEstado = prompt("Ingrese el nuevo estado del libro", libro.estado);
-    const nuevaCantidad = prompt("Ingrese la nueva cantidad del libro", libro.cantidad);
-
-    libros[index] = {
-        nombre: nuevoNombre,
-        autor: nuevoAutor,
-        categoria: nuevaCategoria,
-        estado: nuevoEstado,
-        cantidad: nuevaCantidad
-    };
-
-    guardarLibros(libros);
-    mostrarStock();
-}
-
-// Función para eliminar un libro
-function eliminarLibro(index) {
-    const libros = cargarLibros();
-    libros.splice(index, 1);
-    guardarLibros(libros);
-    mostrarStock();
-}
-
-// Mostrar los libros al cargar la página
-mostrarStock();
-    </script>
 </body>
 </html>
