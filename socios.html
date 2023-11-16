@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        input[type="submit"] {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .pago-btn-si {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+
+        .pago-btn-no {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .detalles-btn {
+            background-color: #f39c12;
+            color: #fff;
+        }
+
+        .eliminar-btn {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .historial-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .cerrar-btn {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Socios</h1>
+    <form onsubmit="agregarSocio(event)">
+        <label for="nombreSocio">Nombre:</label>
+        <input type="text" id="nombreSocio" name="nombreSocio" required>
+        <input type="submit" value="Agregar Socio">
+    </form>
+
+    <label for="busqueda">Buscar socio:</label>
+    <input type="text" id="busqueda" oninput="buscarSocio()">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Número de Socio</th>
+                <th>Nombre</th>
+                <th>Membresía</th>
+                <th>Pago Mes Actual</th>
+                <th>Detalles</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="socios-table"></tbody>
+    </table>
+
+    <div id="historialDialog" class="historial-dialog">
+        <h2>Historial de Pagos</h2>
+        <ul id="historialLista"></ul>
+        <button class="cerrar-btn" onclick="cerrarHistorial()">Cerrar</button>
+    </div>
+
+    <script src="socios.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cargar socios al cargar la página
+            cargarSocios();
+        });
+
+        function cargarSocios() {
+            // Obtener socios desde localStorage
+            const socios = localStorage.getItem('socios');
+            const listaSocios = socios ? JSON.parse(socios) : [];
+
+            // Mostrar los socios en la tabla
+            mostrarSocios(listaSocios);
+        }
+
+        function mostrarSocios(socios) {
+            const tablaSocios = document.getElementById('socios-table');
+            const historialDialog = document.getElementById('historialDialog');
+
+            // Limpiar la tabla antes de agregar los socios
+            tablaSocios.innerHTML = '';
+
+            socios.forEach((socio, index) => {
+                const fila = tablaSocios.insertRow();
+                const celdaNumero = fila.insertCell(0);
+                const celdaNombre = fila.insertCell(1);
+                const celdaMembresia = fila.insertCell(2);
+                const celdaPagoMes = fila.insertCell(3);
+                const celdaDetalles = fila.insertCell(4);
+                const celdaAcciones = fila.insertCell(5);
+
+                // Agregar el número de socio como 000X
+                celdaNumero.textContent = ('000' + (index + 1)).slice(-4);
+                celdaNombre.textContent = socio.nombre;
+                celdaMembresia.textContent = socio.membresia;
+
+                // Agregar el botón de Pago Mes Actual con tick y cruz
+                const botonPagoMes = document.createElement('button');
+                botonPagoMes.textContent = `Pago Mes Actual ${obtenerFechaActual()}`;
+                botonPagoMes.classList.add('pago-mes-btn');
+                botonPagoMes.onclick = () => mostrarOpcionesPago(socio, index);
+                celdaPagoMes.appendChild(botonPagoMes);
+
+                // Agregar el botón de Detalles
+                const botonDetalles = document.createElement('button');
+                botonDetalles.textContent = 'Detalles';
+                botonDetalles.classList.add('detalles-btn');
+                botonDetalles.onclick = () => mostrarHistorial(socio);
+                celdaDetalles.appendChild(botonDetalles);
+
+                // Agregar el botón de Eliminar
+                const botonEliminar = document.createElement('button');
+                botonEliminar.textContent = 'Eliminar';
+                botonEliminar.classList.add('eliminar-btn');
+                botonEliminar.onclick = () => eliminarSocio(index);
+                celdaAcciones.appendChild(botonEliminar);
+                
+                const botonTick = document.createElement('button');
+                botonTick.textContent = '✔';
+                botonTick.style.color = 'green';
+                botonTick.onclick = () => mostrarOpcionesPago(socio, index, true);
+
+                const botonCruz = document.createElement('button');
+                botonCruz.textContent = '✘';
+                botonCruz.style.color = 'red';
+                botonCruz.onclick = () => mostrarOpcionesPago(socio, index, false);
+
+                celdaPagoMes.appendChild(botonTick);
+                celdaPagoMes.appendChild(botonCruz);
+            });
+        }
+
+        function mostrarOpcionesPago(socio, index, pagoRealizado) {
+        if (pagoRealizado) {
+            const fechaActual = obtenerFechaActual();
+            alert(`${socio.nombre} pagó el mes actual el ${fechaActual}`);
+            marcarPago(index, true, fechaActual);
+        } else {
+            alert(`${socio.nombre} no pagó el mes actual`);
+            marcarPago(index, false, '-');
+        }
+
+        cargarSocios();
+        }
+
+
+        function marcarPago(index, pagoRealizado, fecha) {
+            // Obtener socios desde localStorage
+            const socios = localStorage.getItem('socios');
+            const listaSocios = socios ? JSON.parse(socios) : [];
+
+            // Actualizar el estado de membresía y la fecha de pago del mes actual
+            listaSocios[index].membresia = pagoRealizado;
+            listaSocios[index].fechaPagoMes = fecha;
+
+            // Guardar en localStorage
+            localStorage.setItem('socios', JSON.stringify(listaSocios));
+        }
+
+        function agregarSocio(event) {
+            event.preventDefault();
+            const nombreSocio = document.getElementById('nombreSocio').value;
+
+            if (nombreSocio) {
+                // Obtener socios desde localStorage
+                const socios = localStorage.getItem('socios');
+                const listaSocios = socios ? JSON.parse(socios) : [];
+
+                // Agregar el nuevo socio con número incremental
+                const nuevoSocio = { nombre: nombreSocio, membresia: false, fechaPagoMes: '-' };
+                listaSocios.push(nuevoSocio);
+
+                // Guardar en localStorage
+                localStorage.setItem('socios', JSON.stringify(listaSocios));
+
+                // Recargar y mostrar los socios
+                cargarSocios();
+            } else {
+                alert('Por favor, ingrese un nombre de socio válido.');
+            }
+        }
+
+        function mostrarDetalles(index) {
+            // Obtener socios desde localStorage
+            const socios = localStorage.getItem('socios');
+            const listaSocios = socios ? JSON.parse(socios) : [];
+
+            const socio = listaSocios[index];
+
+            // Mostrar detalles del socio (nombre, número de socio, membresía y fecha de pago)
+            alert(`Detalles del socio:
+                Nombre: ${socio.nombre}
+                Número de Socio: ${('000' + (index + 1)).slice(-4)}
+                Membresía Pagada: ${socio.membresia ? 'Sí' : 'No'}
+                Fecha de Pago del Mes Actual: ${socio.fechaPagoMes}`);
+        }
+
+        function marcarPago(index, pagoRealizado) {
+            // Obtener socios desde localStorage
+            const socios = localStorage.getItem('socios');
+            const listaSocios = socios ? JSON.parse(socios) : [];
+
+            // Actualizar el estado de membresía y la fecha de pago del mes actual
+            listaSocios[index].membresia = pagoRealizado;
+            listaSocios[index].fechaPagoMes = obtenerFechaActual();
+
+            // Guardar en localStorage
+            localStorage.setItem('socios', JSON.stringify(listaSocios));
+
+            // Recargar y mostrar los socios
+            cargarSocios();
+        }
+
+        function eliminarSocio(index) {
+            const confirmacion = confirm(`¿Estás seguro de que deseas eliminar al socio ${index + 1}?`);
+            if (confirmacion) {
+                // Obtener socios desde localStorage
+                const socios = localStorage.getItem('socios');
+                const listaSocios = socios ? JSON.parse(socios) : [];
+
+                // Eliminar al socio seleccionado
+                listaSocios.splice(index, 1);
+
+                // Actualizar los números de socio
+                for (let i = index; i < listaSocios.length; i++) {
+                    listaSocios[i].numeroSocio = i + 1;
+                }
+
+                // Guardar en localStorage
+                localStorage.setItem('socios', JSON.stringify(listaSocios));
+
+                // Recargar y mostrar los socios
+                cargarSocios();
+            }
+        }
+
+        function obtenerFechaActual() {
+            const fechaActual = new Date();
+            const mesActual = fechaActual.toLocaleString('es-ES', { month: 'long' });
+            const diaActual = fechaActual.getDate();
+            const añoActual = fechaActual.getFullYear();
+            return `${diaActual} ${mesActual} ${añoActual}`;
+        }
+
+        function mostrarHistorial(index) {
+            // Obtener socios desde localStorage
+            const socios = localStorage.getItem('socios');
+            const listaSocios = socios ? JSON.parse(socios) : [];
+
+            const socio = listaSocios[index];
+
+            // Mostrar historial del socio en el cuadro de diálogo
+            const historialDialog = document.getElementById('historialDialog');
+            const historialLista = document.getElementById('historialLista');
+
+            historialLista.innerHTML = '';
+
+            socio.historial.forEach((pago, index) => {
+                const itemLista = document.createElement('li');
+                itemLista.textContent = `Mes ${index + 1}: ${pago ? 'Pagado' : 'No Pagado'}`;
+                historialLista.appendChild(itemLista);
+            });
+
+            historialDialog.style.display = 'block';
+        }
+
+        function cerrarHistorial() {
+            // Cerrar el cuadro de diálogo del historial
+            const historialDialog = document.getElementById('historialDialog');
+            historialDialog.style.display = 'none';
+        }
+
+        function buscarSocio() {
+            // Obtener el valor de búsqueda
+            const valorBusqueda = document.getElementById('busqueda').value.toLowerCase();
+
+            // Obtener socios desde localStorage
+            const socios = localStorage.getItem('socios');
+            const listaSocios = socios ? JSON.parse(socios) : [];
+
+            // Filtrar socios según la búsqueda
+            const sociosFiltrados = listaSocios.filter(socio => {
+                // Buscar por número de socio o por nombre
+                const numeroSocio = ('000' + (listaSocios.indexOf(socio) + 1)).slice(-4);
+                return numeroSocio.includes(valorBusqueda) || socio.nombre.toLowerCase().includes(valorBusqueda);
+            });
+
+            // Mostrar los socios filtrados en la tabla
+            mostrarSocios(sociosFiltrados);
+        }
+    </script>
+</body>
+</html>
