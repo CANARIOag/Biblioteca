@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alquiler</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        a {
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #007BAA;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BAA;
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #005b82;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BAA;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .acciones button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .acciones button.delete {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .acciones button.deliver {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alquiler</title>
+    <style>
+        /* Estilos aquí... */
+    </style>
+</head>
+<body>
+    <a href="index.html"><button>Volver a la Página Principal</button></a>
+
+    <h1>Alquiler</h1>
+
+    <!-- Formulario para seleccionar el libro y establecer la duración del alquiler -->
+    <form onsubmit="realizarAlquiler(event)">
+        <!-- Recuperar información del socio del URL -->
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const numeroSocio = urlParams.get('socio');
+        </script>
+        <!-- Almacenar el número de socio en un campo oculto -->
+        <input type="hidden" id="numeroSocio" name="numeroSocio" value="">
+        <script>
+            // Asignar el valor del número de socio al campo oculto
+            document.getElementById('numeroSocio').value = numeroSocio;
+
+            // Llamamos a estas funciones de carga al inicio
+            cargarOpcionesLibro();
+            cargarOpcionesSocio();
+        </script>
+
+        <!-- Sección para seleccionar un socio -->
+        <label for="socio">Selecciona un socio (opcional):</label>
+        <select id="socio" name="socio" onchange="autocompletarCliente()">
+            <!-- Opciones de socios se cargarán dinámicamente con JavaScript -->
+        </select>
+
+        <!-- Campos para la información del cliente -->
+        <label for="nombreCliente">Nombre del Cliente:</label>
+        <input type="text" id="nombreCliente" name="nombreCliente" required>
+
+        <label for="documentoCliente">Documento del Cliente:</label>
+        <input type="text" id="documentoCliente" name="documentoCliente" required>
+
+        <label for="telefonoCliente">Teléfono del Cliente:</label>
+        <input type="tel" id="telefonoCliente" name="telefonoCliente" required>
+
+        <label for="libro">Selecciona un libro:</label>
+        <select id="libro" name="libro" required>
+            <!-- Opciones de libros se cargarán dinámicamente con JavaScript -->
+        </select>
+
+        <label for="duracion">Duración del alquiler (en días):</label>
+        <input type="number" id="duracion" name="duracion" required>
+
+        <input type="submit" value="Realizar Alquiler">
+    </form>
+
+    <h2>Historial de Alquileres</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Socio</th>
+                <th>Libro</th>
+                <th>Duración (días)</th>
+                <th>Fecha de Devolución</th>
+                <th>Cliente</th>
+                <th>Documento del Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="historialBody">
+        </tbody>
+    </table>
+
+    <script>
+        cargarHistorial();
+
+        function cargarHistorial() {
+            const historialBody = document.getElementById('historialBody');
+
+            const historialAlquileres = JSON.parse(localStorage.getItem('historialAlquileres')) || [];
+
+            historialBody.innerHTML = '';
+
+            historialAlquileres.forEach((alquiler, index) => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${alquiler.socio}</td>
+                    <td>${alquiler.libro}</td>
+                    <td>${alquiler.duracion}</td>
+                    <td>${alquiler.fechaDevolucion}</td>
+                    <td>${alquiler.cliente.nombre} (${alquiler.cliente.telefono})</td>
+                    <td>${alquiler.cliente.documento}</td>
+                    <td class="acciones">
+                        <button onclick="eliminarAlquiler(${index})" class="delete">Eliminar</button>
+                        <button onclick="entregarLibro(${index})" class="deliver">${alquiler.entregado ? 'Entregado' : 'Entrego'}</button>
+                    </td>
+                `;
+                historialBody.appendChild(fila);
+            });
+        }
+
+        function agregarAlquilerAlHistorial(alquiler) {
+            const historialAlquileres = JSON.parse(localStorage.getItem('historialAlquileres')) || [];
+
+            historialAlquileres.push(alquiler);
+
+            localStorage.setItem('historialAlquileres', JSON.stringify(historialAlquileres));
+
+            cargarHistorial();
+        }
+
+        function eliminarAlquiler(index) {
+            const historialAlquileres = JSON.parse(localStorage.getItem('historialAlquileres')) || [];
+
+            historialAlquileres.splice(index, 1);
+
+            localStorage.setItem('historialAlquileres', JSON.stringify(historialAlquileres));
+
+            cargarHistorial();
+        }
+
+        function entregarLibro(index) {
+        // Obtener historial de alquileres desde localStorage
+        const historialAlquileres = JSON.parse(localStorage.getItem('historialAlquileres')) || [];
+
+        // Marcar el libro como entregado en el índice dado
+        if (!historialAlquileres[index].entregado) {
+            const fechaActual = new Date();
+            const fechaDevolucion = new Date(historialAlquileres[index].fechaDevolucion);
+
+            // Verificar si se entregó antes de la fecha de devolución
+            if (fechaActual < fechaDevolucion) {
+                historialAlquileres[index].entregadoAntesDeTiempo = true;
+            }
+        }
+
+        // Marcar el libro como entregado
+        historialAlquileres[index].entregado = true;
+
+        // Actualizar localStorage con el nuevo historial
+        localStorage.setItem('historialAlquileres', JSON.stringify(historialAlquileres));
+
+        // Devolver el libro al stock
+        devolverLibro(historialAlquileres[index].libro);
+
+        // Volver a cargar el historial después de marcar un libro como entregado
+        cargarHistorial();
+        }
+
+        // Función para devolver un libro al stock
+        function devolverLibro(libroNombre) {
+            // Obtener libros en stock desde localStorage de stock.html
+            const librosEnStock = JSON.parse(localStorage.getItem('libros')) || [];
+
+            // Buscar el libro en el array de libros en stock
+            const libro = librosEnStock.find(l => l.nombre === libroNombre);
+
+            // Incrementar la cantidad del libro
+            if (libro) {
+                libro.cantidad++;
+                // Actualizar localStorage con la nueva cantidad
+                localStorage.setItem('libros', JSON.stringify(librosEnStock));
+                console.log(`Libro "${libroNombre}" devuelto al stock.`);
+            }
+        }
+
+        function cargarOpcionesSocio() {
+            const selectSocio = document.getElementById('socio');
+
+            const socios = JSON.parse(localStorage.getItem('socios')) || [];
+
+            // Limpiar las opciones actuales
+            selectSocio.innerHTML = '<option value="">Sin Socio</option>';
+
+            // Agregar nuevas opciones basadas en el array de socios
+            socios.forEach(socio => {
+                const opcion = document.createElement('option');
+                opcion.value = socio.numero;
+                opcion.textContent = `${socio.numero} - ${socio.nombre}`;
+                selectSocio.appendChild(opcion);
+            });
+
+            console.log('Socios cargados:', socios);
+        }
+        
+        cargarOpcionesLibro();
+
+        function cargarOpcionesLibro() {
+            const selectLibro = document.getElementById('libro');
+
+            // Obtener libros en stock desde localStorage de stock.html
+            const librosEnStock = JSON.parse(localStorage.getItem('libros')) || [];
+
+            // Limpiar las opciones actuales
+            selectLibro.innerHTML = '';
+
+            // Agregar nuevas opciones basadas en el array librosEnStock
+            librosEnStock.forEach(libro => {
+                const opcion = document.createElement('option');
+                opcion.value = libro.nombre;
+                opcion.textContent = libro.nombre + ` (${libro.cantidad} disponibles)`;
+                selectLibro.appendChild(opcion);
+            });
+
+            console.log('Libros cargados:', librosEnStock);
+        }
+
+        function realizarAlquiler(event) {
+            event.preventDefault();
+
+            const numeroSocio = document.getElementById('numeroSocio').value;
+            const socioSeleccionado = document.getElementById('socio').value;
+            const libroSeleccionado = document.getElementById('libro').value;
+            const duracionAlquiler = document.getElementById('duracion').value;
+            const nombreCliente = document.getElementById('nombreCliente').value;
+            const telefonoCliente = document.getElementById('telefonoCliente').value;
+
+            // Obtener libros en stock desde localStorage de stock.html
+            const librosEnStock = JSON.parse(localStorage.getItem('libros')) || [];
+
+            // Buscar el libro en el array de libros en stock
+            const libro = librosEnStock.find(l => l.nombre === libroSeleccionado);
+
+            if (libro && libro.cantidad > 0) {
+                // Actualizar la cantidad del libro
+                libro.cantidad--;
+
+                // Actualizar localStorage con la nueva cantidad
+                localStorage.setItem('libros', JSON.stringify(librosEnStock));
+
+                // Registrar el alquiler con la información del cliente
+                const fechaDevolucion = calcularFechaDevolucion(duracionAlquiler);
+                const alquiler = {
+                    socio: socioSeleccionado || 'Sin Socio',
+                    libro: libro.nombre,
+                    duracion: duracionAlquiler,
+                    fechaDevolucion: fechaDevolucion,
+                    cliente: {
+                        nombre: nombreCliente,
+                        telefono: telefonoCliente
+                    }
+                };
+
+                // Puedes almacenar los registros de alquiler en localStorage si lo deseas
+                // Aquí solo se muestra un mensaje de alerta con la información del alquiler
+                alert(`Alquiler realizado:
+                    Socio/Cliente: ${socioSeleccionado || 'Sin Socio'}
+                    Libro: ${libro.nombre}
+                    Duración del alquiler: ${duracionAlquiler} días
+                    Fecha de devolución: ${fechaDevolucion}
+                    Cliente: ${nombreCliente} (Teléfono: ${telefonoCliente})`);
+
+                // Agregar el alquiler al historial
+                agregarAlquilerAlHistorial(alquiler);
+            } else {
+                alert('El libro seleccionado no está disponible en stock.');
+            }
+
+            // Volver a cargar las opciones de libro y socio después de realizar el alquiler
+            cargarOpcionesLibro();
+        }
+
+        // Función para calcular la fecha de devolución basada en la duración del alquiler
+        function calcularFechaDevolucion(duracionAlquiler) {
+            const fechaActual = new Date();
+            const fechaDevolucion = new Date(fechaActual.getTime() + duracionAlquiler * 24 * 60 * 60 * 1000);
+            return fechaDevolucion.toLocaleDateString('es-ES');
+        }
+
+        function cargarOpcionesSocio() {
+        const selectSocio = document.getElementById('socio');
+
+        // Obtener socios desde localStorage de socios.html
+        const socios = JSON.parse(localStorage.getItem('socios')) || [];
+
+        // Limpiar las opciones actuales
+        selectSocio.innerHTML = '<option value="">Sin Socio</option>';
+
+        // Agregar nuevas opciones basadas en el array de socios
+        socios.forEach(socio => {
+            const opcion = document.createElement('option');
+            opcion.value = socio.numero;
+            opcion.textContent = `${socio.numero} - ${socio.nombre}`;
+            selectSocio.appendChild(opcion);
+        });
+
+        console.log('Socios cargados:', socios);
+    }
+    cargarOpcionesSocio();
+
+    function autocompletarCliente() {
+        const selectSocio = document.getElementById('socio');
+        const nombreClienteInput = document.getElementById('nombreCliente');
+        const documentoClienteInput = document.getElementById('documentoCliente');
+        const telefonoClienteInput = document.getElementById('telefonoCliente');
+
+        // Obtener el socio seleccionado
+        const socioSeleccionado = selectSocio.value;
+        
+        // Obtener socios desde localStorage de socios.html
+        const socios = JSON.parse(localStorage.getItem('socios')) || [];
+
+        // Encontrar la información del socio seleccionado
+        const socioInfo = socios.find(socio => socio.numero === socioSeleccionado);
+
+        // Completar las casillas de cliente con la información del socio
+        if (socioInfo) {
+            nombreClienteInput.value = socioInfo.nombre;
+            documentoClienteInput.value = socioInfo.documento || 'No disponible';
+            telefonoClienteInput.value = socioInfo.telefono || 'No disponible';
+        } else {
+            // Limpiar las casillas si no hay socio seleccionado
+            nombreClienteInput.value = '';
+            documentoClienteInput.value = '';
+            telefonoClienteInput.value = '';
+        }
+    }
+    </script>
+</body>
+</html>

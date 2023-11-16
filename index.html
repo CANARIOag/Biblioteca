@@ -11,11 +11,12 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background: url('5848bd73be95f0534075ce6b9fa49869.jpg') no-repeat center center fixed;
+    background-size: cover;
 }
 
 header, footer {
-    background-color: #333;
+    background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
     padding: 20px;
     text-align: center;
@@ -25,35 +26,14 @@ h1 {
     margin: 0;
 }
 
-#libros-section {
-    padding: 20px;
-}
-
-#libros-lista {
-    list-style-type: none;
-    padding: 0;
-}
-
-#libros-lista li {
-    margin: 10px 0;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
+#botones {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#libros-lista li:hover {
-    background-color: #f0f0f0;
+    justify-content: space-around;
+    margin: 20px 0;
 }
 
 button {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 20px;
+    padding: 15px 30px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -61,8 +41,28 @@ button {
     transition: background-color 0.3s ease;
 }
 
+button#verStock {
+    background-color: #3498db;
+    color: #fff;
+}
+
+button#pedidos {
+    background-color: #2ecc71;
+    color: #fff;
+}
+
+button#socios {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+button#alquiler {
+    background-color: #9b59b6;
+    color: #fff;
+}
+
 button:hover {
-    background-color: #555;
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .footer-content {
@@ -85,7 +85,7 @@ footer {
     left: 0;
     bottom: 0;
     width: 100%;
-    background-color: #333;
+    background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
     padding: 10px;
 }
@@ -95,13 +95,12 @@ footer {
         <h1>Bienvenido a la Biblioteca</h1>
     </header>
 
-    <button onclick="Stock()">Ver Stock</button>
-
-    <button onclick="Pedidos()">Pedidos</button>
-
-    <button onclick="clientes()">Clientes</button>
-
-    <button onclick="socios()">Socios</button>
+    <div id="botones">
+        <button id="verStock" onclick="Stock()">Ver Stock</button>
+        <button id="pedidos" onclick="Pedidos()">Pedidos</button>
+        <button id="socios" onclick="socios()">Socios</button>
+        <button id="alquiler" onclick="alquiler()">Alquiler</button>
+    </div>
 
     <footer>
         <p>Biblioteca</p>

@@ -13,3 +13,7 @@ function clientes() {
 function socios() {
     window.location.href = "socios.html";
 }
+
+function alquiler() {
+    window.location.href = "alquiler.html";
+}
