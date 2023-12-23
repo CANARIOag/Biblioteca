@@ -102,17 +102,14 @@ function realizarCompra(event) {
     if (nombre && autor && categoria && estado && cantidad) {
         const nuevoLibro = { nombre, autor, categoria, estado, cantidad };
 
-        // Almacenar el estado original antes de cambiarlo a "En Camino"
         const estadoOriginal = nuevoLibro.estado;
 
         guardarCompra(nuevoLibro);
 
         alert("Compra realizada con éxito. El libro estará en camino.");
 
-        // Cambiar el estado a "En Camino"
         nuevoLibro.estado = "En Camino";
 
-        // Después de un intervalo de 15 a 30 segundos, cambiar el estado al valor original
         setTimeout(() => {
             nuevoLibro.estado = estadoOriginal;
             guardarCompra(nuevoLibro);
