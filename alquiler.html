@@ -134,31 +134,23 @@
 
     <h1>Alquiler</h1>
 
-    <!-- Formulario para seleccionar el libro y establecer la duración del alquiler -->
     <form onsubmit="realizarAlquiler(event)">
-        <!-- Recuperar información del socio del URL -->
         <script>
             const urlParams = new URLSearchParams(window.location.search);
             const numeroSocio = urlParams.get('socio');
         </script>
-        <!-- Almacenar el número de socio en un campo oculto -->
         <input type="hidden" id="numeroSocio" name="numeroSocio" value="">
         <script>
-            // Asignar el valor del número de socio al campo oculto
             document.getElementById('numeroSocio').value = numeroSocio;
 
-            // Llamamos a estas funciones de carga al inicio
             cargarOpcionesLibro();
             cargarOpcionesSocio();
         </script>
 
-        <!-- Sección para seleccionar un socio -->
         <label for="socio">Selecciona un socio (opcional):</label>
         <select id="socio" name="socio" onchange="autocompletarCliente()">
-            <!-- Opciones de socios se cargarán dinámicamente con JavaScript -->
         </select>
 
-        <!-- Campos para la información del cliente -->
         <label for="nombreCliente">Nombre del Cliente:</label>
         <input type="text" id="nombreCliente" name="nombreCliente" required>
 
@@ -170,7 +162,6 @@
 
         <label for="libro">Selecciona un libro:</label>
         <select id="libro" name="libro" required>
-            <!-- Opciones de libros se cargarán dinámicamente con JavaScript -->
         </select>
 
         <label for="duracion">Duración del alquiler (en días):</label>
@@ -246,45 +237,33 @@
         }
 
         function entregarLibro(index) {
-        // Obtener historial de alquileres desde localStorage
         const historialAlquileres = JSON.parse(localStorage.getItem('historialAlquileres')) || [];
 
-        // Marcar el libro como entregado en el índice dado
         if (!historialAlquileres[index].entregado) {
             const fechaActual = new Date();
             const fechaDevolucion = new Date(historialAlquileres[index].fechaDevolucion);
 
-            // Verificar si se entregó antes de la fecha de devolución
             if (fechaActual < fechaDevolucion) {
                 historialAlquileres[index].entregadoAntesDeTiempo = true;
             }
         }
 
-        // Marcar el libro como entregado
         historialAlquileres[index].entregado = true;
 
-        // Actualizar localStorage con el nuevo historial
         localStorage.setItem('historialAlquileres', JSON.stringify(historialAlquileres));
 
-        // Devolver el libro al stock
         devolverLibro(historialAlquileres[index].libro);
 
-        // Volver a cargar el historial después de marcar un libro como entregado
         cargarHistorial();
         }
 
-        // Función para devolver un libro al stock
         function devolverLibro(libroNombre) {
-            // Obtener libros en stock desde localStorage de stock.html
             const librosEnStock = JSON.parse(localStorage.getItem('libros')) || [];
 
-            // Buscar el libro en el array de libros en stock
             const libro = librosEnStock.find(l => l.nombre === libroNombre);
 
-            // Incrementar la cantidad del libro
             if (libro) {
                 libro.cantidad++;
-                // Actualizar localStorage con la nueva cantidad
                 localStorage.setItem('libros', JSON.stringify(librosEnStock));
                 console.log(`Libro "${libroNombre}" devuelto al stock.`);
             }
@@ -295,10 +274,8 @@
 
             const socios = JSON.parse(localStorage.getItem('socios')) || [];
 
-            // Limpiar las opciones actuales
             selectSocio.innerHTML = '<option value="">Sin Socio</option>';
 
-            // Agregar nuevas opciones basadas en el array de socios
             socios.forEach(socio => {
                 const opcion = document.createElement('option');
                 opcion.value = socio.numero;
@@ -314,13 +291,10 @@
         function cargarOpcionesLibro() {
             const selectLibro = document.getElementById('libro');
 
-            // Obtener libros en stock desde localStorage de stock.html
             const librosEnStock = JSON.parse(localStorage.getItem('libros')) || [];
 
-            // Limpiar las opciones actuales
             selectLibro.innerHTML = '';
 
-            // Agregar nuevas opciones basadas en el array librosEnStock
             librosEnStock.forEach(libro => {
                 const opcion = document.createElement('option');
                 opcion.value = libro.nombre;
@@ -341,20 +315,15 @@
             const nombreCliente = document.getElementById('nombreCliente').value;
             const telefonoCliente = document.getElementById('telefonoCliente').value;
 
-            // Obtener libros en stock desde localStorage de stock.html
             const librosEnStock = JSON.parse(localStorage.getItem('libros')) || [];
 
-            // Buscar el libro en el array de libros en stock
             const libro = librosEnStock.find(l => l.nombre === libroSeleccionado);
 
             if (libro && libro.cantidad > 0) {
-                // Actualizar la cantidad del libro
                 libro.cantidad--;
 
-                // Actualizar localStorage con la nueva cantidad
                 localStorage.setItem('libros', JSON.stringify(librosEnStock));
 
-                // Registrar el alquiler con la información del cliente
                 const fechaDevolucion = calcularFechaDevolucion(duracionAlquiler);
                 const alquiler = {
                     socio: socioSeleccionado || 'Sin Socio',
@@ -367,8 +336,6 @@
                     }
                 };
 
-                // Puedes almacenar los registros de alquiler en localStorage si lo deseas
-                // Aquí solo se muestra un mensaje de alerta con la información del alquiler
                 alert(`Alquiler realizado:
                     Socio/Cliente: ${socioSeleccionado || 'Sin Socio'}
                     Libro: ${libro.nombre}
@@ -376,17 +343,14 @@
                     Fecha de devolución: ${fechaDevolucion}
                     Cliente: ${nombreCliente} (Teléfono: ${telefonoCliente})`);
 
-                // Agregar el alquiler al historial
                 agregarAlquilerAlHistorial(alquiler);
             } else {
                 alert('El libro seleccionado no está disponible en stock.');
             }
 
-            // Volver a cargar las opciones de libro y socio después de realizar el alquiler
             cargarOpcionesLibro();
         }
 
-        // Función para calcular la fecha de devolución basada en la duración del alquiler
         function calcularFechaDevolucion(duracionAlquiler) {
             const fechaActual = new Date();
             const fechaDevolucion = new Date(fechaActual.getTime() + duracionAlquiler * 24 * 60 * 60 * 1000);
@@ -396,13 +360,10 @@
         function cargarOpcionesSocio() {
         const selectSocio = document.getElementById('socio');
 
-        // Obtener socios desde localStorage de socios.html
         const socios = JSON.parse(localStorage.getItem('socios')) || [];
 
-        // Limpiar las opciones actuales
         selectSocio.innerHTML = '<option value="">Sin Socio</option>';
 
-        // Agregar nuevas opciones basadas en el array de socios
         socios.forEach(socio => {
             const opcion = document.createElement('option');
             opcion.value = socio.numero;
@@ -420,22 +381,17 @@
         const documentoClienteInput = document.getElementById('documentoCliente');
         const telefonoClienteInput = document.getElementById('telefonoCliente');
 
-        // Obtener el socio seleccionado
         const socioSeleccionado = selectSocio.value;
         
-        // Obtener socios desde localStorage de socios.html
         const socios = JSON.parse(localStorage.getItem('socios')) || [];
 
-        // Encontrar la información del socio seleccionado
         const socioInfo = socios.find(socio => socio.numero === socioSeleccionado);
 
-        // Completar las casillas de cliente con la información del socio
         if (socioInfo) {
             nombreClienteInput.value = socioInfo.nombre;
             documentoClienteInput.value = socioInfo.documento || 'No disponible';
             telefonoClienteInput.value = socioInfo.telefono || 'No disponible';
         } else {
-            // Limpiar las casillas si no hay socio seleccionado
             nombreClienteInput.value = '';
             documentoClienteInput.value = '';
             telefonoClienteInput.value = '';
